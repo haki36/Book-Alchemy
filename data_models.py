@@ -10,10 +10,10 @@ class Author(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
     birth_date = Column(String(50), nullable=False)
-    date_of_death = Column(String(50), nullable=False)
+    date_of_death = Column(String(50), nullable=True)
 
     books = relationship('Book', backref='author')
-    
+
     def __repr__(self):
         return f"<Author {self.name}>"
 

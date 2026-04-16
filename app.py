@@ -48,20 +48,31 @@ def add_book():
         db.session.commit()
         success_message = 'Book was added successfully.'
 
-    return render_template('add_book.html', success_message=success_message)
+    return render_template('add_book.html', authors=authors, success_message=success_message)
 
 @app.route('/', methods = ['GET', 'POST'])
 def home():
-    sort_data = request.form.get('sort', 'title')
+    sort_data = request.args.get('sort', 'title')
+    search_term = request.args.get('search', '')
 
-    books = Book.query.all()
+    books_query = Book.query
+
+    if search_term:
+        books_query = books_query.filter(Book.title.ilike(f'%{search_term}%'))
+
+    books = books_query.all()
 
     if sort_data == 'title':
         books = sorted(books, key=lambda book: book.title.lower())
     elif sort_data == 'author':
         books = sorted(books, key=lambda book: book.author.name.lower())
 
-    return render_template('home.html', books=books, sort_data=sort_data)
+    return render_template(
+        'home.html',
+        books=books,
+        sort_data=sort_data,
+        search_term=search_term
+    )
 
-if __name__ == 'main':
+if __name__ == "__main__":
     app.run(debug=True)
