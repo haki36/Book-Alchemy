@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
@@ -11,6 +12,8 @@ class Author(db.Model):
     birth_date = Column(String(50), nullable=False)
     date_of_death = Column(String(50), nullable=False)
 
+    books = relationship('Book', backref='author')
+    
     def __repr__(self):
         return f"<Author {self.name}>"
 
