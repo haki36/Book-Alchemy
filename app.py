@@ -12,10 +12,13 @@ The application uses Flask-SQLAlchemy with a SQLite database.
 """
 
 import os
-from flask import Flask, render_template, request
+from flask import Flask, flash, render_template, request, redirect, url_for
 from data_models import db, Author, Book
 
+
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'dev_secret_key'
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = \
@@ -26,6 +29,7 @@ db.init_app(app)
 # Only for creating tables once
 # with app.app_context():
 #     db.create_all()
+
 
 @app.route('/add_author', methods=['GET', 'POST'])
 def add_author():
@@ -83,6 +87,38 @@ def add_book():
 
     return render_template('add_book.html', authors=authors, success_message=success_message)
 
+
+@app.route('/book/<int:book_id>/delete', methods=['POST'])
+def delete_book(book_id):
+    """
+    Handle book deletion from the database.
+    POST:
+        Receive the book id from the URL,
+        find the matching Book object,
+        delete it from the database,
+        and redirect back to the home page.
+    Args:
+        book_id (int): The id of the book that should be deleted.
+    Returns:
+        Response: Redirect to the home page.
+    """
+    book = Book.query.get_or_404(book_id)
+    author = book.author
+
+    db.session.delete(book)
+    db.session.commit()
+
+    remaining_books = Book.query.filter_by(author_id=author.id).count()
+
+    if remaining_books == 0:
+        db.session.delete(author)
+        db.session.commit()
+
+    flash('Book was deleted successfully.')
+
+    return redirect(url_for('home'))
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     """
@@ -116,6 +152,7 @@ def home():
         sort_data=sort_data,
         search_term=search_term
     )
+
 
 if __name__ == "__main__":
     app.run(debug=True)

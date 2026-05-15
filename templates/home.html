@@ -23,6 +23,16 @@
             <button type="submit">Search</button>
         </form>
 
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div>
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         {% if books %}
             {% for book in books %}
                 <div>
@@ -33,11 +43,24 @@
                     <p><strong>Author:</strong> {{ book.author.name }}</p>
                     <p><strong>Publication Year:</strong> {{ book.publication_year }}</p>
                     <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+
+                    <form 
+                        action="{{ url_for('delete_book', book_id=book.id) }}"
+                        method="POST"
+                        onsubmit="return confirm('Bist du sicher, dass du dieses Buch löschen möchtest?');">
+                        <button type="submit">
+                            Delete
+                        </button>
+                    </form>
                 </div>
             {% endfor %}
         {% else %}
             <p class="error">No books found matching your search.</p>
         {% endif %}
+        <div class="navigation">
+            <a href="{{ url_for('add_author') }}">Add Author</a>
+            <a href="{{ url_for('add_book') }}">Add Book</a>
+        </div>
     </div>
 </body>
 </html>
